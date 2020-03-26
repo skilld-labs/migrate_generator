@@ -1,0 +1,14 @@
+services:
+  logger.channel.migrate_generator:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['migrate_generator']
+  migrate_generator.scanner:
+    class: Drupal\migrate_generator\Scanner
+    arguments: [ '@entity_type.manager', '@entity_type.bundle.info', '@entity_field.manager', '@logger.channel.migrate_generator' ]
+  migrate_generator.generator:
+    class: Drupal\migrate_generator\Generator
+    arguments: [ '@logger.channel.migrate_generator', '@plugin.manager.migrate_generator.process', '@file_system']
+  plugin.manager.migrate_generator.process:
+    class: Drupal\migrate_generator\GeneratorProcessPluginManager
+    parent: default_plugin_manager

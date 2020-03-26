@@ -26,7 +26,7 @@ We could use next ways of organizing source files:
 ------------
 ## Fields support
 
-In each source file, we should have Id column required (as unique identifier for row) and all other columns with exact field machine_names. 
+In each source file, we should have Id column required (as unique identifier for row) and all other columns with exact field machine_names.
 
 Need to take care about next things:
 * Language field should have language code in source csv, not labels
@@ -39,8 +39,8 @@ Example of field types to support:
   - **link**
   - **datetime_range**
   - **address**
-  - **price**. 
- 
+  - **price**.
+
 * For file migration, we could have 2 possible cases:
   - we have absolute filepath in csv -> then we use file_copy process plugin
   - we have URLs in csv -> we use download plugin
@@ -76,22 +76,22 @@ and in voc category.csv :
 | 12 | test category |
 
 
-This makes structure to be pretty strict and it could have some "useless" sources. 
+This makes structure to be pretty strict and it could have some "useless" sources.
 
 For example, for Media references, content is referencing Media entity and then media entity is referencing file entity => so we'd have separate sources for Content, Media and File.
 
 Multiple csv files can be hard to maintain, but this is the price for universal tool.
 
 We cannot use `entity_generate` plugin here, as we need universal source structure that should fit any projects:
-* Related entity could have relation to some other entity. This case cannot be handled with entity_generate atm 
+* Related entity could have relation to some other entity. This case cannot be handled with entity_generate atm
 * You cannot use process plugins inside entity_generate
 * Improving it would make it overly complex (there are migrations itself for creating complex objects)
-* We would loose ability to rollback 
+* We would loose ability to rollback
 
 ------------
 #### Example of source structure in diagram:
 
-![image](https://s3.amazonaws.com/awesomescreenshot/upload//38107/286deb84-d59d-4a7e-5d21-4aa42a704e96.png?AWSAccessKeyId=AKIAJSCJQ2NM3XLFPVKA&Expires=1585075035&Signature=ZzcFSbpcQ1DogmNkEnGSW05J2M0%3D)
+![image](https://user-images.githubusercontent.com/4222740/79104309-20f65a80-7d90-11ea-9592-717eabe95d51.png)
 
 Here you can see some complicated cases, when we have multiple dependencies:
 1. Paragraph field in Basic Page CT could have references to WYSIWYG paragraph and Media paragraph
@@ -99,6 +99,6 @@ Here you can see some complicated cases, when we have multiple dependencies:
 
 So will have to use `migration_lookup` process plugin on several migrations
 
-PS As you can see even for this pretty simply content structure, we will have to manage too many source files. 
+PS As you can see even for this pretty simply content structure, we will have to manage too many source files.
 
 I have some doubts if it is really worth it, cause create content from drupal UI and export with default_content - will be much easier here.
