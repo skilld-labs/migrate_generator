@@ -5,8 +5,6 @@ namespace Drupal\migrate_generator\Plugin\migrate\process;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\migrate\MigrateExecutableInterface;
-use Drupal\migrate\MigrateSkipProcessException;
-use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -14,24 +12,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Creates a price array from the input value.
  *
- * Build a keyed array where price is the first value in the input array and the
- * currency code is the second. If there is no price value, an empty array is
- * returned.
+ * Build a keyed array for price field.
+ * If there is no price value, an empty array is returned.
+ * Also you can provide value for currency_code.
  *
  * Example:
  * @code
  * price:
  *   plugin: commerce_price
- *   source:
- *     - price
- *     - currency_code
+ *   currency_code: currency_code
+ *   source: price
+ *     -
  * @endcode
  *
  * When price = 12.00 and code is 'CAD', a keyed array, where 'number' => 12.00
  * and 'currency_code => 'CAD'.
  *
  * @MigrateProcessPlugin(
- *   id = "commerce_price"
+ *   id = "commerce_price",
+ *   handle_multiples = TRUE
  * )
  */
 class CommercePrice extends ProcessPluginBase implements ContainerFactoryPluginInterface {
@@ -79,30 +78,48 @@ class CommercePrice extends ProcessPluginBase implements ContainerFactoryPluginI
     // Get list of available currencies.
     $currencies = $this->entityTypeManager->getStorage('commerce_currency')->loadMultiple();
     $currency_codes = array_keys($currencies);
-
-    list($number, $code) = $value;
-    $new_value = [];
-    if ($number) {
-      $new_value['number'] = $number;
-    }
-    if ($code) {
-      $code = strtoupper($code);
-      if (in_array($code, $currency_codes)) {
-        $new_value['currency_code'] = $code;
+    $processed_values = [];
+    if (!empty($value)) {
+      if (is_string($value)) {
+        $value = [$value];
       }
-      else {
-        // Skip processing of current value.
-        $message = $this->t('Provided currency code %code not exists', ['%code' => $code]);
-        // Log the message.
-        $migrate_executable->saveMessage($message);
-        throw new MigrateSkipProcessException($message);
-      }
-    }
-    else {
       // Use first currency code as default.
-      $new_value['currency_code'] = array_shift($currency_codes);
+      $currency_values = key($currencies);
+      if (!empty($this->configuration['currency_code'])) {
+        $currency_values = $row->get($this->configuration['currency_code']);
+      }
+      foreach ($value as $key => $item) {
+        $currency = $currency_values;
+        if (is_array($currency_values)) {
+          if (isset($currency_values[$key])) {
+            $currency = $currency_values[$key];
+          }
+          else {
+            $currency = reset($currency_values);
+          }
+        }
+        // Check if currency code exists.
+        if (!in_array($currency, $currency_codes)) {
+          // Skip processing of current value and log message.
+          $message = $this->t('Provided currency code %code not exists', ['%code' => $currency]);
+          $migrate_executable->saveMessage($message);
+          continue;
+        }
+
+        $processed_values[] = [
+          'number' => $item,
+          'currency_code' => $currency,
+        ];
+      }
     }
-    return $new_value;
+    return $processed_values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function multiple() {
+    return TRUE;
   }
 
 }

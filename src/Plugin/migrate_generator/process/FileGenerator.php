@@ -21,43 +21,57 @@ class FileGenerator extends GeneratorProcessPluginBase {
 
     $process[] = [
       'plugin' => 'skip_on_file_not_exists',
+      'method' => 'process',
+    ];
+
+    $process[] = [
+      'plugin' => 'to_array',
+    ];
+
+    return $process;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function process($field_name) {
+    $process = [
+      $field_name . '_tmp' => $this->getBaseProcess($field_name),
     ];
 
     switch ($this->options['file_source']) {
       case 'external':
-        $process_plugin = 'do wnload';
+        $process_plugin = 'download';
         break;
 
       case 'absolute':
         $process_plugin = 'file_copy';
         break;
-
     }
 
-    $process[] = [
+    $source = '@' . $field_name . '_tmp';
+    if ($this->getFieldStorageDefinition()->getCardinality() == 1) {
+      $source = [$source];
+    }
+
+    $process[$field_name] = [
       'plugin' => 'sub_process',
-      'source' => [
-        'constants/' . $field_name . '_destination',
-        'null',
-      ],
+      'source' => $source,
       'process' => [
-        'source' => [
-          'plugin' => 'get',
-          'source' => [
-            1,
-          ],
-        ],
+        'source' => '0',
         'filename' => [
           'plugin' => 'callback',
           'callable' => 'basename',
-          'source' => [
-            1,
-          ],
+          'source' => '0',
+        ],
+        'target_directory' => [
+          'plugin' => 'default_value',
+          'default_value' => $this->getTargetDirectory($field_name),
         ],
         'destination' => [
           'plugin' => 'concat',
           'source' => [
-            0,
+            '@target_directory',
             '@filename',
           ],
         ],
@@ -79,6 +93,13 @@ class FileGenerator extends GeneratorProcessPluginBase {
     ];
 
     return $process;
+  }
+
+  /**
+   * Get directory name for migrating file.
+   */
+  private function getTargetDirectory($field_name) {
+    return $this->getFieldStorageDefinition()->getSetting('uri_scheme') . '://' . $field_name . DIRECTORY_SEPARATOR;
   }
 
 }

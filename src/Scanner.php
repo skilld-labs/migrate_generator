@@ -135,14 +135,13 @@ class Scanner {
         'migration_id' => $this->getMigrationId($entity_type, $bundle),
         'source' => $source_file,
         'header' => $header,
+        'id' => reset($header),
       ];
       $sources[$entity_type][$bundle] = $source_data;
     }
-
     // Once all sources were scanned,
     // we can check field definition and dependencies.
     $this->checkFields($sources);
-
     return $sources;
   }
 
@@ -155,6 +154,10 @@ class Scanner {
         $fields_info = [];
         $instances = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
         foreach ($source_info['header'] as &$column) {
+          // Do not use first column (it will be used only for internal ID mapping).
+          if ($column == $source_info['id']) {
+            continue;
+          }
           // Check if this field has several properties.
           $item = explode('/', $column);
           $fieldname = $item[0];

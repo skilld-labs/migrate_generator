@@ -80,7 +80,7 @@ class Generator {
   public function createMigration($entity_type, $bundle, $source, $migration_group, $options) {
     $migration_id = $source['migration_id'];
     // Check if migration exists.
-    $migration = MigrationGroup::load($migration_id);
+    $migration = Migration::load($migration_id);
     if (empty($migration)) {
       $migrate_properties = [
         'id' => $migration_id,
@@ -91,22 +91,17 @@ class Generator {
         'source' => $this->setSource($source, $options),
         'destination' => $this->setDestination($entity_type, $bundle),
       ];
-
-      // Do not process first field used for ID.
-      array_shift($source['fields']);
       $migration_dependencies = [];
       $migration_process = [];
       foreach ($source['fields'] as $field_name => $field_info) {
         $field_info['options'] = $options;
         try {
           $plugin = $this->processPluginManager->createInstance($field_info['field_type'], $field_info);
-          // Add constants for file destination folder.
+          // Prepare file destination folder.
           if (in_array($field_info['field_type'], ['file', 'image'])) {
-            // Get destination schema storage field settings.
-            $directory = $plugin->getFieldStorageDefinition()->getSetting('uri_scheme') . '://' . $field_name . DIRECTORY_SEPARATOR;
-            // Prepare destination directory.
+            // Use destination schema storage field settings.
+            $directory = $field_info['field_storage_definition']->getSetting('uri_scheme') . '://' . $field_name . DIRECTORY_SEPARATOR;
             $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
-            $migrate_properties['source']['constants'][$field_name . '_destination'] = $directory;
           }
           // Get migration process for field.
           $migration_process = array_merge($migration_process, $plugin->process($field_name));
@@ -165,7 +160,7 @@ class Generator {
       'enclosure' => $options['enclosure'],
       'header_row_count' => 1,
       'fields' => $fields,
-      'ids' => [reset($source['header'])],
+      'ids' => [$source['id']],
       'constants' => [],
     ];
   }
