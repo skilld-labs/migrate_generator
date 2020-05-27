@@ -1,4 +1,5 @@
 name: 'Migrate generator'
+description: 'Module to generate migrations based on source CSV files.'
 type: module
 core_version_requirement: ^8 || ^9
 
@@ -8,3 +9,4 @@ dependencies:
   - drupal:migrate
   - migrate_plus:migrate_plus
   - migrate_source_csv:migrate_source_csv
+  - migrate_tools:migrate_tools

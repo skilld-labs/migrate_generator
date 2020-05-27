@@ -12,7 +12,8 @@
   "require": {
     "drupal/core": "^8.7 || ^9",
     "drupal/migrate_plus": "^4.2",
-    "drupal/migrate_source_csv": "^3.2"
+    "drupal/migrate_source_csv": "^3.2",
+    "drupal/migrate_tools": "^4.5"
   },
   "extra": {
     "drush": {

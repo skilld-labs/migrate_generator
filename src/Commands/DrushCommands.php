@@ -57,16 +57,13 @@ class DrushCommands extends DrushCommandsBase {
    *   Delimiter for multi-valued fields. Defaults to |
    * @option date_format
    *   Date format used in CSV. Defaults to "d-m-Y H:i:s"
-   * @option file_source
-   *   Type of filepath sources, used in CSV.
-   *   Can be "external" (means external URLs to files)
-   *     or "absolute" (absolute filepath to local files).
-   *   Defaults to "absolute".
+   * @option update
+   *   Update previously-generated migrations.
    *
    * @command migrate_generator:generate_migrations
    *
-   * @usage drush migrate_generator:generate_migrations
-   *   Generate migrations from CSV sources from folder.
+   * @usage drush migrate_generator:generate_migrations $(pwd)/web/modules/custom/migrate_generator/example
+   *   Generate migrations from CSV sources from example folder.
    */
   public function generateMigrations($directory, array $options = [
     'pattern' => '*.csv',
@@ -74,7 +71,6 @@ class DrushCommands extends DrushCommandsBase {
     'enclosure' => '"',
     'values_delimiter' => '|',
     'date_format' => 'd-m-Y H:i:s',
-    'file_source' => 'absolute',
   ]) {
     // Scan source files.
     $sources = $this->scanner->readSources($directory, $options);
@@ -82,10 +78,17 @@ class DrushCommands extends DrushCommandsBase {
       $migration_group = $this->generator->createMigrationGroup();
       foreach ($sources as $entity_type => $entity_info) {
         foreach ($entity_info as $bundle => $source_info) {
-          $this->generator->createMigration($entity_type, $bundle, $source_info, $migration_group, $options);
+          $migration = $this->generator->createMigration($entity_type, $bundle, $source_info, $migration_group, $options);
+          if ($migration) {
+            $this->logger()->notice('Migration ' . $migration->id() . ' was created');
+          }
         }
       }
     }
+    $this->logger()->notice(
+      'Generation of migrations was completed. You can now run them using next command:
+drush migrate:import --all --group=migrate_generator_group'
+    );
   }
 
 }

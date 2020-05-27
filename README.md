@@ -3,14 +3,14 @@ Module to generate migrations based on source CSV files
 
 ## Basic idea
 
-Main idea here is to **automatically generate migration config based on source csv**.
+Main idea here is to **automatically generate migration config based on source csv files**.
 
 ------------
 ## Drush command
 
-`drush migrate_generator:generate_migrations %arg`
+`drush migrate_generator:generate_migrations %arg %options`
 
-Where %arg - absolute path to directory with source .csv files.
+Where %arg - absolute path to directory with source .csv files. All source files should be placed there without any subfolders.
 
 Also we have next possible options:
 * pattern -
@@ -23,14 +23,10 @@ Also we have next possible options:
   Delimiter for multi-valued fields. Defaults to |
 * date_format -
   Date format used in CSV. Defaults to "d-m-Y H:i:s"
-* file_source -
-  Type of filepath sources, used in CSV.
-  Can be "external" (means external URLs to files) or "absolute" (absolute filepath to local files).
-  Defaults to "absolute".
+* update -
+  Update previously-generated migrations.
 
 This command creates Migration Group named `Migrate generator group` (if not exists) and migration for each source file.
-
-For now, this drush command doesn't update existing migration, so if you need to regenerate it - you'd remove existing migration fisrt.
 
 ## CSV file structure and contents
 
@@ -42,7 +38,7 @@ We should use next ways of organizing source files:
 **Main idea here - to identify target Entity type and Bundle for source file.**
 
 There are some rules for structure and content of source csv file:
-* Each source file should have first column filled with Ids (it will be used as unique identifier for source row)
+* Each source file should have first column filled with Ids. It will be used as unique identifier for source row only, not for Id of migrated entity.
 * All other columns should be named with exact field's machine name.
 * For boolean fields you can use "1/0" or "true/false" values.
 * For list fields, we should have key values in source csv, not labels.
@@ -53,31 +49,32 @@ There are some rules for structure and content of source csv file:
 
   This date format can be specified by **date_format** option in drush command.
 
-## Complex fields with multiple properties.
+  No timezone conversion is made for dates.
 
-For complex fields, like Formatter text, Link, Datetime Range, Address, Price, we could have several properties in source file.
+## Complex fields with multiple properties
+
+For complex fields like Formatter text, Link, Datetime Range, Address, Price, we can have several properties in source file.
 In this case, you can use `/` separator in column name for these cases.
 
-For example, `body/value`, `body/format`, `price/number`, `price/currency_code`, etc.
+Supported complex field types:
+  - **formatted text** (we can use format and value properties)
+  - **link** (we can use uri and title properties)
+  - **datetime_range** (we can use value and end_value properties)
+  - **address** (we can use various properties like country_code, locality, postal_code, etc.)
+  - **price** (we can use number and currency_code properties)
 
-Example of supported complex field types:
-  - **formatted text** (we have format and value properties)
-  - **link** (we could have uri and title properties)
-  - **datetime_range** (we could have value and end_value properties)
-  - **address**
-  - **price**. (we could have number and currency_code properties)
+For example, `body/value`, `body/format`, `date/value`, `date/end_value`, `price/number`, `price/currency_code`, etc.
 
-Any other complex field type also could work this way, but it is not guaranteed.
+Any other complex field type also could work this way.
+It is not guaranteed, but you can extend this functionality writing own GeneratorProcessPlugin.
 
-## File and Image fields.
+## File and Image fields
 
 For file migration, we could have 2 possible cases:
   - we have absolute filepath in csv
   - we have URLs in csv
 
-This can be specified by **file_source** option in drush command.
-
-* For `absolute` case, you'd have absolute filepath to files in csv.
+* For `absolute` case, you'd have absolute filepaths to files in csv.
 
   These files will be copied to Drupal filesystem into folder, named by field name.
 

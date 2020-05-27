@@ -115,8 +115,8 @@ class Scanner {
       $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
       // Skip if bundle not exists.
       if (!($bundle_info && isset($bundle_info[$bundle]))) {
-        $this->logger->alert(
-          'Bundle %bundle not exists for %entity entity. Skipping.',
+        $this->logger->warning(
+          'Bundle %bundle does not exist for %entity entity. Skipping.',
           [
             '%bundle' => $bundle,
             '%entity' => $entity_type,
@@ -154,7 +154,8 @@ class Scanner {
         $fields_info = [];
         $instances = $this->entityFieldManager->getFieldDefinitions($entity_type, $bundle);
         foreach ($source_info['header'] as &$column) {
-          // Do not use first column (it will be used only for internal ID mapping).
+          // Do not use first column
+          // It will be used only for internal ID mapping.
           if ($column == $source_info['id']) {
             continue;
           }
@@ -233,8 +234,8 @@ class Scanner {
             $fields_info[$fieldname] = $field_info;
           }
           else {
-            $this->logger->alert(
-              'Field %field not found for %bundle of %entity entity.',
+            $this->logger->warning(
+              'Field %field not found for %bundle %entity.',
               [
                 '%field' => $fieldname,
                 '%bundle' => $bundle,

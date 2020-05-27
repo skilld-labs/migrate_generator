@@ -38,17 +38,6 @@ class FileGenerator extends GeneratorProcessPluginBase {
     $process = [
       $field_name . '_tmp' => $this->getBaseProcess($field_name),
     ];
-
-    switch ($this->options['file_source']) {
-      case 'external':
-        $process_plugin = 'download';
-        break;
-
-      case 'absolute':
-        $process_plugin = 'file_copy';
-        break;
-    }
-
     $source = '@' . $field_name . '_tmp';
     if ($this->getFieldStorageDefinition()->getCardinality() == 1) {
       $source = [$source];
@@ -76,7 +65,7 @@ class FileGenerator extends GeneratorProcessPluginBase {
           ],
         ],
         'final_file' => [
-          'plugin' => $process_plugin,
+          'plugin' => 'file_copy',
           'source' => [
             '@source',
             '@destination',

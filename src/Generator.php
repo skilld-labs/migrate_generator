@@ -74,13 +74,26 @@ class Generator {
   /**
    * Create migration group for generated migrations if not exists.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   Migration object.
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   Migration object or NULL.
    */
   public function createMigration($entity_type, $bundle, $source, $migration_group, $options) {
     $migration_id = $source['migration_id'];
     // Check if migration exists.
     $migration = Migration::load($migration_id);
+    if ($migration) {
+      if ($options['update']) {
+        // Remove existing migration.
+        $migration->delete();
+        unset($migration);
+      }
+      else {
+        $this->logger->notice(
+          'Migration %migration already exists. Skipping.',
+          ['%migration' => $migration_id]
+        );
+      }
+    }
     if (empty($migration)) {
       $migrate_properties = [
         'id' => $migration_id,
@@ -129,9 +142,10 @@ class Generator {
         'required' => $migration_dependencies,
       ];
       $migration = Migration::create($migrate_properties);
+      $migration->save();
+      return $migration;
     }
-    $migration->save();
-    return $migration;
+    return NULL;
   }
 
   /**
