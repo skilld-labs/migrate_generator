@@ -86,6 +86,12 @@ class FileGenerator extends GeneratorProcessPluginBase {
 
   /**
    * Get directory name for migrating file.
+   *
+   * @param string $field_name
+   *   Field name.
+   *
+   * @return string
+   *   URI of destination folder.
    */
   private function getTargetDirectory($field_name) {
     return $this->getFieldStorageDefinition()->getSetting('uri_scheme') . '://' . $field_name . DIRECTORY_SEPARATOR;

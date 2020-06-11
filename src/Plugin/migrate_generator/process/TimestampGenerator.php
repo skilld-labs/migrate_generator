@@ -2,6 +2,8 @@
 
 namespace Drupal\migrate_generator\Plugin\migrate_generator\process;
 
+use Drupal\migrate_generator\Plugin\GeneratorProcessPluginDateBase;
+
 /**
  * Generator process plugin for "Timestamp" field type.
  *
@@ -9,5 +11,5 @@ namespace Drupal\migrate_generator\Plugin\migrate_generator\process;
  *   id = "timestamp"
  * )
  */
-class TimestampGenerator extends CreatedGenerator {
+class TimestampGenerator extends GeneratorProcessPluginDateBase {
 }

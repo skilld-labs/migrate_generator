@@ -2,6 +2,8 @@
 
 namespace Drupal\migrate_generator\Plugin\migrate_generator\process;
 
+use Drupal\migrate_generator\Plugin\GeneratorProcessPluginDateBase;
+
 /**
  * Generator process plugin for "Last changed" field type.
  *
@@ -9,5 +11,5 @@ namespace Drupal\migrate_generator\Plugin\migrate_generator\process;
  *   id = "changed"
  * )
  */
-class ChangedGenerator extends CreatedGenerator {
+class ChangedGenerator extends GeneratorProcessPluginDateBase {
 }

@@ -69,20 +69,20 @@ class Scanner {
    *
    * @param string $directory
    *   Path to directory with source .csv files.
-   * @param array $csv_options
-   *   Additional options for the command.
+   * @param array $options
+   *   Additional options.
    *
    * @return array
    *   Array of source infos.
    */
-  public function readSources($directory, array $csv_options) {
+  public function readSources($directory, array $options) {
     $sources = [];
     // Read files from specified folder.
     if (!is_dir($directory)) {
       throw new \Exception('The destination directory does not exist.');
     }
     // Look for source files in defined directory.
-    $source_files = glob($directory . DIRECTORY_SEPARATOR . $csv_options['pattern']);
+    $source_files = glob($directory . DIRECTORY_SEPARATOR . $options['pattern']);
     if (empty($source_files)) {
       throw new \Exception('Source files not found in the destination directory.');
     }
@@ -127,12 +127,12 @@ class Scanner {
 
       // Read source file headers.
       $reader = Reader::createFromPath($source_file, 'r');
-      $reader->setDelimiter($csv_options['delimiter']);
-      $reader->setEnclosure($csv_options['enclosure']);
+      $reader->setDelimiter($options['delimiter']);
+      $reader->setEnclosure($options['enclosure']);
       $header = $reader->fetchOne();
 
       $source_data = [
-        'migration_id' => $this->getMigrationId($entity_type, $bundle),
+        'migration_id' => $this->getMigrationId($entity_type, $bundle, $options['migrate_group']),
         'source' => $source_file,
         'header' => $header,
         'id' => reset($header),
@@ -146,9 +146,12 @@ class Scanner {
   }
 
   /**
-   * Get fields definition and dependencies.
+   * Update source array with fields definition and dependencies.
+   *
+   * @param array $sources
+   *   Source info array.
    */
-  protected function checkFields(&$sources) {
+  protected function checkFields(array &$sources) {
     foreach ($sources as $entity_type => &$entity_info) {
       foreach ($entity_info as $bundle => &$source_info) {
         $fields_info = [];
@@ -256,12 +259,14 @@ class Scanner {
    *   Destination entity type.
    * @param string $bundle
    *   Destination bundle.
+   * @param string $migration_group
+   *   Migration Group Id.
    *
    * @return string
    *   Migration Id.
    */
-  protected function getMigrationId($entity_type, $bundle) {
-    return $entity_type . '__' . $bundle;
+  protected function getMigrationId($entity_type, $bundle, $migration_group) {
+    return $migration_group . '__' . $entity_type . '__' . $bundle;
   }
 
 }

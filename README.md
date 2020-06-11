@@ -25,13 +25,16 @@ Also we have next possible options:
   Date format used in CSV. Defaults to "d-m-Y H:i:s"
 * update -
   Update previously-generated migrations.
+* migrate_group -
+  Migration Group Id. Defaults to "migrate_generator_group"
 
-This command creates Migration Group named `Migrate generator group` (if not exists) and migration for each source file.
+This command creates Migration for each source file and Migration Group for these created migrations.
+Migration group ID can be specified by **migrate_group** option in drush command.
 
 ## CSV file structure and contents
 
 We should use next ways of organizing source files:
-* Source CSV files should next filename`{entity_type}-{bundle}.csv` or `{entity_type}.csv`.
+* Source CSV files should have following filename pattern `{entity_type}-{bundle}.csv` or `{entity_type}.csv`.
 
   You can see some examples in /example folder of this module, like `node-basic_page.csv`, `taxonomy_term-category.csv`, `user.csv`, etc.
 
@@ -53,7 +56,7 @@ There are some rules for structure and content of source csv file:
 
 ## Complex fields with multiple properties
 
-For complex fields like Formatter text, Link, Datetime Range, Address, Price, we can have several properties in source file.
+For complex fields like Formatted text, Link, Datetime Range, Address, Price, we can have several properties in source file.
 In this case, you can use `/` separator in column name for these cases.
 
 Supported complex field types:

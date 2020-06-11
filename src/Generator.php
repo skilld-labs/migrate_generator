@@ -3,11 +3,12 @@
 namespace Drupal\migrate_generator;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\File\FileSystemInterface;
-use Psr\Log\LoggerInterface;
-use Drupal\migrate_plus\Entity\MigrationGroup;
-use Drupal\migrate_plus\Entity\Migration;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\migrate_plus\Entity\MigrationGroup;
+use Drupal\migrate_plus\Entity\MigrationGroupInterface;
+use Drupal\migrate_plus\Entity\Migration;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class for migrate generator.
@@ -54,16 +55,19 @@ class Generator {
   /**
    * Create migration group for generated migrations if not exists.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
+   * @param string $migration_group_id
+   *   Migration Group Id.
+   *
+   * @return \Drupal\migrate_plus\Entity\MigrationGroupInterface
    *   Migration Group object.
    */
-  public function createMigrationGroup() {
+  public function createMigrationGroup($migration_group_id) {
     // Create migration group for generated migrations if not exists.
-    $migration_group = MigrationGroup::load('migrate_generator_group');
+    $migration_group = MigrationGroup::load($migration_group_id);
     if (empty($migration_group)) {
       $group_properties = [];
-      $group_properties['id'] = 'migrate_generator_group';
-      $group_properties['label'] = 'Migrate generator group';
+      $group_properties['id'] = $migration_group_id;
+      $group_properties['label'] = 'Migrate generator group ' . $migration_group_id;
       $group_properties['description'] = 'Group for migrations created by Migrate generator module';
       $migration_group = MigrationGroup::create($group_properties);
       $migration_group->save();
@@ -74,10 +78,21 @@ class Generator {
   /**
    * Create migration group for generated migrations if not exists.
    *
-   * @return \Drupal\Core\Entity\EntityInterface|null
+   * @param string $entity_type
+   *   Destination entity type.
+   * @param string $bundle
+   *   Destination bundle.
+   * @param array $source
+   *   Source info array.
+   * @param \Drupal\migrate_plus\Entity\MigrationGroupInterface $migration_group
+   *   Migration Group object.
+   * @param array $options
+   *   Additional options.
+   *
+   * @return \Drupal\migrate_plus\Entity\MigrationInterface|null
    *   Migration object or NULL.
    */
-  public function createMigration($entity_type, $bundle, $source, $migration_group, $options) {
+  public function createMigration($entity_type, $bundle, array $source, MigrationGroupInterface $migration_group, array $options) {
     $migration_id = $source['migration_id'];
     // Check if migration exists.
     $migration = Migration::load($migration_id);

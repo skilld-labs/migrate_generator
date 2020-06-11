@@ -133,7 +133,10 @@ abstract class GeneratorProcessPluginBase extends PluginBase implements Generato
   }
 
   /**
-   * {@inheritdoc}
+   * Get default field source.
+   *
+   * @return mixed
+   *   The source info array.
    */
   protected function getDefaultSourceValue() {
     $properties = $this->getFieldStorageDefinition()->getPropertyDefinitions();

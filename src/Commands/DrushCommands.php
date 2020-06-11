@@ -59,6 +59,8 @@ class DrushCommands extends DrushCommandsBase {
    *   Date format used in CSV. Defaults to "d-m-Y H:i:s"
    * @option update
    *   Update previously-generated migrations.
+   * @option migrate_group
+   *   Migration Group Id.
    *
    * @command migrate_generator:generate_migrations
    *
@@ -71,11 +73,13 @@ class DrushCommands extends DrushCommandsBase {
     'enclosure' => '"',
     'values_delimiter' => '|',
     'date_format' => 'd-m-Y H:i:s',
+    'update' => FALSE,
+    'migrate_group' => 'migrate_generator_group',
   ]) {
     // Scan source files.
     $sources = $this->scanner->readSources($directory, $options);
     if ($sources) {
-      $migration_group = $this->generator->createMigrationGroup();
+      $migration_group = $this->generator->createMigrationGroup($options['migrate_group']);
       foreach ($sources as $entity_type => $entity_info) {
         foreach ($entity_info as $bundle => $source_info) {
           $migration = $this->generator->createMigration($entity_type, $bundle, $source_info, $migration_group, $options);
@@ -87,7 +91,7 @@ class DrushCommands extends DrushCommandsBase {
     }
     $this->logger()->notice(
       'Generation of migrations was completed. You can now run them using next command:
-drush migrate:import --all --group=migrate_generator_group'
+drush migrate:import --all --group=' . $options['migrate_group']
     );
   }
 
