@@ -1,0 +1,6 @@
+services:
+  migrate_generator.commands:
+    class: Drupal\migrate_generator\Commands\DrushCommands
+    arguments: ['@migrate_generator.scanner', '@migrate_generator.generator']
+    tags:
+      - { name: drush.command }
