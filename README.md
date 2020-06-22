@@ -1,6 +1,12 @@
 # migrate_generator
 Module to generate migrations based on source CSV files
 
+# Deprecation notice
+
+This module has been moved to https://www.drupal.org/project/migrate_generator
+
+Do not use this repo anymore
+
 ## Basic idea
 
 Main idea here is to **automatically generate migration config based on source csv files**.
